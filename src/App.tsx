@@ -1,18 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { AppBar, Container, Toolbar, Typography } from '@material-ui/core';
-import { VideosTable } from './components/videos-table';
-import { getVideos } from './services/videos';
-import { ProcessedVideo } from './common/interfaces';
+import { VideosTable } from './components/video/videos-table';
+import { VideoForm } from './components/video/video-form';
+
+type AppState = { type: 'list' } | { type: 'add' } | { type: 'edit'; videoId: number };
 
 const App: React.FC = () => {
-  const [videos, setVideos] = useState<ProcessedVideo[]>([]);
-
-  useEffect(() => {
-    getVideos()
-      .then((videos) => {
-        setVideos(videos);
-      });
-  }, []);
+  const [appState, setAppState] = useState<AppState>({ type: 'list' });
 
   return (
     <>
@@ -21,8 +15,12 @@ const App: React.FC = () => {
           <Typography variant="h6">Videos</Typography>
         </Toolbar>
       </AppBar>
-      <Container>
-        <VideosTable videos={videos} />
+      <Container style={{ marginTop: '40px' }}>
+        {appState.type === 'list' ? (
+          <VideosTable onEditVideo={(videoId) => setAppState({ type: 'edit', videoId })} onAddVideo={() => setAppState({ type: 'add' })} />
+        ) : (
+          <VideoForm mode={appState} onClose={() => setAppState({ type: 'list' })} />
+        )}
       </Container>
     </>
   );
